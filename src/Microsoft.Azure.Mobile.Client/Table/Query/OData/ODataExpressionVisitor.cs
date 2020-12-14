@@ -170,16 +170,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                 // Format dates in the official OData format
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    "datetime'{0}'",
+                    //"datetime'{0}'",
+                    "{0}",
                     Uri.EscapeDataString(
-                        ToRoundtripDateString(((DateTime)value)))
-                    );
+                         //ToRoundtripDateString(((DateTime)value))
+                         ((DateTimeOffset)value).ToString("o")
+                    ));
             }
             else if (handle.Equals(typeof(DateTimeOffset).TypeHandle))
             {
                 return string.Format(
                     CultureInfo.InvariantCulture,
-                    "datetimeoffset'{0}'",
+                    //"datetimeoffset'{0}'",
+                    "{0}",
                     Uri.EscapeDataString(
                         ((DateTimeOffset)value).ToString("o")
                     ));

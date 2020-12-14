@@ -286,6 +286,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
                     this.ValidateFunctionParameters(functionName, functionArgs, 1);
                     break;
                 case "substringof":
+                case "contains":
                 case "startswith":
                 case "endswith":
                 case "concat":

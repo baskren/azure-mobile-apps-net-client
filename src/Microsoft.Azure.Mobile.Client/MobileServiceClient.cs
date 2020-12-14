@@ -45,6 +45,8 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </summary>
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
 
+        public static bool Verbose { get; set; }
+
         /// <summary>
         /// Absolute URI of the Microsoft Azure Mobile App.
         /// </summary>
@@ -299,10 +301,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceTable<T> GetTable<T>()
         {
-            string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
+            var tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
             return new MobileServiceTable<T>(tableName, this);
         }
-
 
         /// <summary>
         /// Returns a <see cref="IMobileServiceSyncTable{T}"/> instance, which provides
@@ -316,8 +317,17 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// </returns>
         public IMobileServiceSyncTable<T> GetSyncTable<T>()
         {
-            string tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
+            var tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
             return new MobileServiceSyncTable<T>(tableName, MobileServiceTableKind.Table, this);
+        }
+
+
+        public LiveCollectionTable<T> GetLiveCollectionTable<T>() where T : IBaseModel<T>
+        {
+            var tableName = this.SerializerSettings.ContractResolver.ResolveTableName(typeof(T));
+            if (LiveCollectionTable<T>.Tables.TryGetValue(tableName, out ILiveCollectionTable table) && table is LiveCollectionTable<T> tableT)
+                return tableT;
+            return new LiveCollectionTable<T>(tableName, MobileServiceTableKind.Table, this);
         }
 
         /// <summary>

@@ -5,6 +5,7 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -48,7 +49,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         /// <summary>
         /// Gets the link to next page of result that is returned in response headers.
         /// </summary>
-        public Uri NextLink { get; private set; }
+        public Uri NextLink { get; internal set; }
 
         /// <summary>
         /// The deserialized response
@@ -74,9 +75,42 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
         {
             Arguments.IsNotNull(httpResponse, nameof(httpResponse));
 
-            JToken response = httpResponse.Content.ParseToJToken(serializerSettings);
+            JToken jtokenResponse = httpResponse.Content.ParseToJToken(serializerSettings);
 
-            Uri link = httpResponse.Link != null && httpResponse.Link.Relation == NextRelation ? httpResponse.Link.Uri : null;
+            JToken response = null;
+            Uri link = null;
+
+            // the below was added to allow for the modified form for which the data is recieved from the Proxy
+            if (jtokenResponse is JArray array && array.Count == 1)
+            {
+                jtokenResponse = array[0];
+                response = jtokenResponse["value"];
+                if (jtokenResponse["@odata.nextLink"] is JToken nextLink && nextLink.Value<string>() is string nv)
+                {
+                    /*
+                    if (!string.IsNullOrWhiteSpace(context))
+                    {
+                        var trunkIndex = context.IndexOf("/tables");
+                        var trunk = context.Substring(0, trunkIndex);
+                        var branchIndex = nv.IndexOf("/tables");
+                        var branch = nv.Substring(branchIndex);
+                        nv = trunk + branch;
+                    }
+                    */
+                    link = new Uri(nv);
+                }
+            }
+
+            //Uri link = httpResponse.Link != null && httpResponse.Link.Relation == NextRelation ? httpResponse.Link.Uri : null;
+
+            /*
+            string context = null;
+            if (jtokenResponse["@odata.context"] is JToken contextToken && contextToken.Value<string>() is string ctx)
+            {
+                context = ctx;
+            }
+            */
+
             return Parse(response, link, validate);
         }
 
@@ -118,7 +152,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Query
             var result = new JObject()
             {
                 { InlineCountCountKey, this.TotalCount },
-                { InlineCountResultsKey, this.Values },                
+                { InlineCountResultsKey, this.Values },
             };
 
             if (this.NextLink != null)

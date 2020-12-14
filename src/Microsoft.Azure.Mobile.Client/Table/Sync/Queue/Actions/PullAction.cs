@@ -77,6 +77,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     query = MobileServiceUrlBuilder.CombinePathAndQuery(this.Query.UriPath, query);
                 }
                 result = await this.Table.ReadAsync(query, MobileServiceTable.IncludeDeleted(parameters), this.Table.Features);
+
                 await this.ProcessAll(result.Values); // process the first batch
 
                 result = await FollowNextLinks(result);
@@ -89,6 +90,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         private async Task ProcessAll(JArray items)
         {
+            if (items is null)
+                return;
+
             this.CancellationToken.ThrowIfCancellationRequested();
 
             var deletedIds = new List<string>();
@@ -186,7 +190,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             // if we got as many as we initially wanted 
             // or there are no more results
             // then we're at the end
-            return cursor.Complete || result.Values.Count == 0;
+            return cursor.Complete || result.Values is null || result.Values.Count == 0;
         }
 
         private async Task CreatePullStrategy()

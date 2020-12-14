@@ -1,4 +1,4 @@
-// ----------------------------------------------------------------------------
+﻿// ----------------------------------------------------------------------------
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // ----------------------------------------------------------------------------
 
@@ -18,6 +18,8 @@ namespace Microsoft.WindowsAzure.MobileServices
 {
     internal class MobileServiceHttpClient : IDisposable
     {
+
+
         /// <summary>
         /// Name of the header to indicate the feature(s) initiating the remote server call.
         /// </summary>
@@ -72,7 +74,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <summary>
         /// The user-agent header value to use with all requests.
         /// </summary>
-        private string userAgentHeaderValue;
+        private readonly string userAgentHeaderValue;
 
         /// <summary>
         /// Represents a handler used to process HTTP requests and responses
@@ -259,22 +261,59 @@ namespace Microsoft.WindowsAzure.MobileServices
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(RequestJsonContentType));
 
             // Get the response
+<<<<<<< Updated upstream
             HttpClient client = UseHandlers ? httpClient : httpClientSansHandlers;
             HttpResponseMessage response = await SendRequestAsync(client, request, ensureResponseContent, cancellationToken);
             string responseContent = await GetResponseContent(response);
             string etag = response.Headers.ETag?.Tag;
-
-            LinkHeaderValue link = null;
-            if (response.Headers.Contains("Link"))
+=======
+            HttpClient client;
+            if (UseHandlers)
             {
-                link = LinkHeaderValue.Parse(response.Headers.GetValues("Link").FirstOrDefault());
+                client = this.httpClient;
             }
+            else
+            {
+                client = this.httpClientSansHandlers;
+            }
+>>>>>>> Stashed changes
 
-            // Dispose of the request and response
-            request.Dispose();
-            response.Dispose();
+            try
+            {
+                HttpResponseMessage response = await this.SendRequestAsync(client, request, ensureResponseContent, cancellationToken);
+                string responseContent = await GetResponseContent(response);
 
-            return new MobileServiceHttpResponse(responseContent, etag, link);
+                if (MobileServiceClient.Verbose)
+                {
+                    System.Diagnostics.Debug.WriteLine("\t RESPONSE: ");
+                    var lines = responseContent.Split(new[] { '\r', '\n' });
+                    foreach (var line in lines)
+                        System.Diagnostics.Debug.WriteLine("\t\t" + line);
+                }
+
+                string etag = null;
+                if (response.Headers.ETag != null)
+                {
+                    etag = response.Headers.ETag.Tag;
+                }
+
+                LinkHeaderValue link = null;
+                if (response.Headers.Contains("Link"))
+                {
+                    link = LinkHeaderValue.Parse(response.Headers.GetValues("Link").FirstOrDefault());
+                }
+
+                // Dispose of the request and response
+                request.Dispose();
+                response.Dispose();
+
+                return new MobileServiceHttpResponse(responseContent, etag, link);
+            }
+            catch (Exception e)
+            {
+                e = e.InnerException ?? e;
+                throw new Exception(e.GetType() + " thrown when trying to access " + request.RequestUri + "" + (e.Message != null ? "\n"+e.Message : "") + (e.InnerException != null ? "\n" + e.InnerException.GetType() + "\n" + e.InnerException.Message : ""), e);
+            }
         }
 
         /// <summary>
@@ -317,6 +356,9 @@ namespace Microsoft.WindowsAzure.MobileServices
 
             requestHeaders = FeaturesHelper.AddFeaturesHeader(requestHeaders, features);
             HttpRequestMessage request = this.CreateHttpRequestMessage(method, uriPathAndQuery, requestHeaders, content, user);
+<<<<<<< Updated upstream
+            return await SendRequestAsync(httpClient, request, ensureResponseContent: false, cancellationToken: cancellationToken);
+=======
 
             // Get the response
             HttpResponseMessage response = await this.SendRequestAsync(httpClient, request, ensureResponseContent: false, cancellationToken: cancellationToken);
@@ -331,6 +373,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             return response;
+>>>>>>> Stashed changes
         }
 
         /// <summary>
@@ -622,6 +665,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             Arguments.IsNotNull(client, nameof(client));
             Arguments.IsNotNull(request, nameof(request));
 
+
             // Send the request and get the response back as string
             HttpResponseMessage response;
             try
@@ -629,6 +673,7 @@ namespace Microsoft.WindowsAzure.MobileServices
                 if (MobileServiceClient.Verbose)
                     System.Diagnostics.Debug.WriteLine("[MobileServiceHttpClient." + P42.Utils.ReflectionExtensions.CallerString() + ": URL [" + request.RequestUri + "]");
                 response = await client.SendAsync(request, cancellationToken);
+
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
             {
@@ -648,17 +693,22 @@ namespace Microsoft.WindowsAzure.MobileServices
             // If there was supposed to be response content and there was not, throw
             if (ensureResponseContent)
             {
-                long? contentLength = null;
-                if (response.Content != null)
-                {
-                    contentLength = response.Content.Headers.ContentLength;
-                }
+                bool responseIsCompressed = IsResponseCompressed(response);
 
-                if (contentLength == null || contentLength <= 0)
+                if (!responseIsCompressed && response.Content != null)
                 {
+<<<<<<< Updated upstream
+
+                    long? contentLength = response.Content.Headers.ContentLength;
+                    if (contentLength == null || contentLength <= 0)
+                    {
+                        throw new MobileServiceInvalidOperationException("The server did not provide a response with the expected content.", request, response);
+                    }
+=======
                     if (MobileServiceClient.Verbose)
                         System.Diagnostics.Debug.WriteLine("RESPONSE **EMPTY CONTENT**");
                     //throw new MobileServiceInvalidOperationException("The server response was empty.  ODATA content was expected.", request, response);
+>>>>>>> Stashed changes
                 }
             }
 
@@ -714,7 +764,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             var handler = new HttpClientHandler();
             if (handler.SupportsAutomaticDecompression)
             {
-                handler.AutomaticDecompression = DecompressionMethods.GZip;
+                //handler.AutomaticDecompression = DecompressionMethods.GZip;
             }
 
             return handler;
