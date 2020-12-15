@@ -31,7 +31,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
     public interface ILiveCollectionTable<T> : ILiveCollectionTable, IMobileServiceSyncTable<T> where T : IBaseModel<T>
     {
-        P42.Utils.ObservableConcurrentCollection<T> Collection { get; }
+        ObservableConcurrentCollection<T> Collection { get; }
 
         Task PullAsync(QueryPair<T> queryPair);
     }

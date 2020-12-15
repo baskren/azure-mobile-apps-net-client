@@ -20,10 +20,12 @@
     <DebugType>portable</DebugType>
     <RootNamespace>Microsoft.WindowsAzure.MobileServices.SQLiteStore</RootNamespace>
     <Company>Microsoft</Company>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Azure.Mobile.Client\Microsoft.Azure.Mobile.Client.csproj" />
@@ -34,5 +36,8 @@
     <None Include="..\..\LICENSE.txt" PackagePath="LICENSE.txt" Pack="True" />
     <Compile Update="Properties\Resources.Designer.cs" AutoGen="True" DesignTime="True" DependentUpon="Resources.resx" />
     <EmbeddedResource Update="Properties\Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+    <Compile Update="LiveColletionStore.cs">
+      <SubType></SubType>
+    </Compile>
   </ItemGroup>
 </Project>

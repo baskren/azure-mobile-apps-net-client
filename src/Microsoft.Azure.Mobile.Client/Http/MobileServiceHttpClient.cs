@@ -627,7 +627,7 @@ namespace Microsoft.WindowsAzure.MobileServices
             try
             {
                 if (MobileServiceClient.Verbose)
-                    System.Diagnostics.Debug.WriteLine("[MobileServiceHttpClient." + P42.Utils.ReflectionExtensions.CallerString() + ": URL [" + request.RequestUri + "]");
+                    System.Diagnostics.Debug.WriteLine("[MobileServiceHttpClient." + DebugExtensions.CallerString() + ": URL [" + request.RequestUri + "]");
                 response = await client.SendAsync(request, cancellationToken);
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

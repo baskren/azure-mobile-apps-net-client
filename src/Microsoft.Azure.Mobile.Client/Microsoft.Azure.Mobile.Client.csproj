@@ -25,10 +25,12 @@
     <RootNamespace>Microsoft.WindowsAzure.MobileServices</RootNamespace>
     <Company>Microsoft</Company>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' ">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\..\images\icon.png" PackagePath="icon.png" Pack="True" />
@@ -36,11 +38,10 @@
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
     <EmbeddedResource Include="Properties\*.rd.xml" />
-    <Compile Update="Resources.Designer.cs" DesignTime="true" AutoGen="true" DependentUpon="Resources.resx" />
     <EmbeddedResource Update="Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('monoandroid'))">
-    <DefineConstants>$(DefineConstants);PLATFORM_ANDROID</DefineConstants>
+    <DefineConstants>$(DefineConstants);PLATFORM_ANDROID;XAMARIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('monoandroid'))">
     <PackageReference Include="PCLCrypto" Version="2.0.147" />
@@ -49,7 +50,7 @@
     <Compile Include="Platforms\android\**\*.cs" />
   </ItemGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('xamarin.ios'))">
-    <DefineConstants>$(DefineConstants);PLATFORM_IOS</DefineConstants>
+    <DefineConstants>$(DefineConstants);PLATFORM_IOS;XAMARIN</DefineConstants>
   </PropertyGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('xamarin.ios'))">
     <PackageReference Include="PCLCrypto" Version="2.0.147" />
@@ -58,11 +59,12 @@
     <Compile Include="Platforms\ios\**\*.cs" />
   </ItemGroup>
   <PropertyGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
-    <DefineConstants>$(DefineConstants);WINDOWS_UWP;WINDOWS_UAP</DefineConstants>
+    <DefineConstants>$(DefineConstants);WINDOWS_UWP;WINDOWS_UAP;XAMARIN</DefineConstants>
     <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
     <TargetPlatformMinVersion>10.0.16299.0</TargetPlatformMinVersion>
   </PropertyGroup>
   <ItemGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
+    <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
     <Compile Include="Platforms\uwp\**\*.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

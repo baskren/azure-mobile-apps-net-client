@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Specialized;
+#if XAMARIN
 using Xamarin.Essentials;
+#endif
 
 namespace Microsoft.WindowsAzure.MobileServices.Sync
 {
@@ -93,11 +95,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             while (IsLoading)
             {
                 if (MobileServiceClient.Verbose)
-                    System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": T [" + Type + "]");
+                    System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + DebugExtensions.CallerString() + ": T [" + Type + "]");
                 await Task.Delay(500);
             }
             if (MobileServiceClient.Verbose)
-                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": T [" + Type + "]");
+                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + DebugExtensions.CallerString() + ": T [" + Type + "]");
             return;
         }
         #endregion
@@ -106,7 +108,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
     public class LiveCollectionTable<T> : LiveCollectionTable, ILiveCollectionTable<T> where T : IBaseModel<T>
     {
         #region Properties
-        public P42.Utils.ObservableConcurrentCollection<T> Collection { get; private set; } = new P42.Utils.ObservableConcurrentCollection<T>();
+        public ObservableConcurrentCollection<T> Collection { get; private set; } = new ObservableConcurrentCollection<T>();
 
         public override Type Type => typeof(T);
         #endregion
@@ -131,14 +133,16 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 await Task.Delay(5).ConfigureAwait(false);
                 var items = await ReadAsync();
                 var itemsArray = items.ToArray();
-                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": init<"+typeof(T)+"> [" + itemsArray.Length + "]");
+                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + CallerString() + ": init<"+typeof(T)+"> [" + itemsArray.Length + "]");
                 if (Collection.AddRange(itemsArray) is NotifyCollectionChangedEventArgs args)
                     OnCollectionChanged(Collection, args);
-                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": init<" + typeof(T) + "> ["  + "]");
+                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + CallerString() + ": init<" + typeof(T) + "> ["  + "]");
                 OnLoadingCompleted();
-                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": init<" + typeof(T) + "> [" + "]");
+                //System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + CallerString() + ": init<" + typeof(T) + "> [" + "]");
             });
+#if XAMARIN
             Xamarin.Essentials.Connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
+#endif
         }
         #endregion
 
@@ -152,11 +156,13 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             ProcessNextPendingServerRefresh();
         }
 
+#if XAMARIN
         private void Connectivity_ConnectivityChanged(object sender, Xamarin.Essentials.ConnectivityChangedEventArgs e)
         {
             if (e.NetworkAccess == Xamarin.Essentials.NetworkAccess.Internet)
                 ProcessNextPendingServerRefresh();
         }
+#endif
 
         public void ProcessNextPendingServerRefresh()
         {
@@ -177,16 +183,21 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
 
         Task InnerPullAsync(QueryPair<T> queryPair)
         {
+#if XAMARIN
             if (_pulling || IsLoading || Xamarin.Essentials.Connectivity.NetworkAccess != Xamarin.Essentials.NetworkAccess.Internet)
                 return Task.CompletedTask;
+#else
+            if (_pulling || IsLoading)
+                return Task.CompletedTask;
+#endif
             _pulling = true;
 
             var query = CreateQuery();
             if (queryPair?.Predicate != null)
                 query = query.Where(queryPair.Predicate);
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + P42.Utils.ReflectionExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count + "] QueryPair=[" + queryPair + "] query=[" + query + "]");
+            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType().ToString() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "] QueryPair=[" + queryPair + "] query=[" + query + "]");
             var result = PullAsync(queryPair.Id, query, true, CancellationToken.None, null);
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + P42.Utils.ReflectionExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count + "]");
+            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "]");
 
             PendingQueries.Remove(queryPair);
             _pulling = false;
@@ -202,7 +213,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public override void ProcessJObjects(IEnumerable<JObject> serverJObjects)
         {
             //if (MobileServiceClient.Verbose)
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + P42.Utils.ReflectionExtensions.CallerString() + ": serverJObjects<" + typeof(T) + ">.Count[" + serverJObjects.Count() + "]");
+            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + DebugExtensions.CallerString() + ": serverJObjects<" + typeof(T) + ">.Count[" + serverJObjects.Count() + "]");
             var deleteItems = new List<T>();
             var insertItems = new List<T>();
             foreach (var jobject in serverJObjects)
@@ -222,15 +233,19 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 else
                     throw new Exception("huh?");
             }
+#if XAMARIN
             MainThread.BeginInvokeOnMainThread(() =>
             {
+#endif
                 if (deleteItems.Any())
                     OnCollectionChanged(Collection, Collection.RemoveRange(deleteItems));
                 if (insertItems.Any())
                     OnCollectionChanged(Collection, Collection.AddRange(insertItems));
 
-                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + P42.Utils.ReflectionExtensions.CallerString() + ": Collection.Count[" + Collection.Count + "]");
+                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Collection.Count[" + Collection.Count + "]");
+#if XAMARIN
             });
+#endif
         }
 
         public override void RemoveItemsAtIds(IEnumerable<string> ids)
@@ -241,7 +256,15 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     deleteItems.Add(item);
 
             if (deleteItems.Any())
-                MainThread.BeginInvokeOnMainThread(() => OnCollectionChanged(Collection, Collection.RemoveRange(deleteItems)));
+#if XAMARIN
+                MainThread.BeginInvokeOnMainThread(() =>
+#endif
+                OnCollectionChanged(Collection, Collection.RemoveRange(deleteItems))
+#if XAMARIN
+                    );
+#else
+                    ;
+#endif
         }
         #endregion
 
@@ -414,5 +437,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             return innerTable.LookupAsync(id) as Task<JObject>;
         }
         #endregion
+
+
+
+
     }
 }

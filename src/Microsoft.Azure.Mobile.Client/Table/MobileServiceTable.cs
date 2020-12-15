@@ -164,10 +164,10 @@ namespace Microsoft.WindowsAzure.MobileServices
 
         private async Task<QueryResult> ReadAsync(string uriString, MobileServiceFeatures features)
         {
-<<<<<<< Updated upstream
+            /*
             MobileServiceHttpResponse response = await MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, MobileServiceClient.CurrentUser, null, true, features: Features | features);
             return QueryResult.Parse(response, MobileServiceClient.SerializerSettings, validate: false);
-=======
+            */
             MobileServiceHttpResponse response = await this.MobileServiceClient.HttpClient.RequestAsync(HttpMethod.Get, uriString, this.MobileServiceClient.CurrentUser, null, true, features: this.Features | features);
 
 
@@ -210,7 +210,6 @@ namespace Microsoft.WindowsAzure.MobileServices
 
 
             return result;
->>>>>>> Stashed changes
         }
 
         /// <summary>
@@ -303,7 +302,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         /// <returns>
         /// A task that will complete when the update finishes.
         /// </returns>
-        public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters) 
+        public Task<JToken> UpdateAsync(JObject instance, IDictionary<string, string> parameters)
             => UpdateAsync(instance, parameters, MobileServiceFeatures.UntypedTable);
 
         /// <summary>
