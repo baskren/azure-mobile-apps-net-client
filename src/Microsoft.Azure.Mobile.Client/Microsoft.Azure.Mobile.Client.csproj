@@ -1,8 +1,10 @@
-<Project Sdk="MSBuild.Sdk.Extras/2.1.2">
-  <Import Project="..\..\build\Microsoft.Azure.Mobile.Client.Build.props" />
+<Project Sdk="MSBuild.Sdk.Extras/2.0.54">
+  <!--Import Project="..\..\build\Microsoft.Azure.Mobile.Client.Build.props" /-->
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net461;monoandroid90;monoandroid10.0;xamarin.ios10</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;monoandroid90;monoandroid10.0;xamarin.ios10</TargetFrameworks>
+    <!--
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">$(TargetFrameworks);uap10.0;net461;</TargetFrameworks>
+    -->
     <LangVersion>8.0</LangVersion>
     <DefaultLanguage>en-US</DefaultLanguage>
     <CopyLocalLockFileAssemblies>false</CopyLocalLockFileAssemblies>
@@ -37,9 +39,9 @@
     <None Include="..\..\LICENSE.txt" PackagePath="LICENSE.txt" Pack="True" />
     <None Include="**\*.cs;**\*.xml;**\*.axml" Exclude="obj\**\*.*;bin\**\*.*" />
     <Compile Remove="Platforms\**\*.*" />
-    <EmbeddedResource Include="Properties\*.rd.xml" />
-    <EmbeddedResource Update="Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
+
   <PropertyGroup Condition="$(TargetFramework.StartsWith('monoandroid'))">
     <DefineConstants>$(DefineConstants);PLATFORM_ANDROID;XAMARIN</DefineConstants>
   </PropertyGroup>
@@ -48,7 +50,9 @@
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
     <Reference Include="System.Runtime.Serialization" />
     <Compile Include="Platforms\android\**\*.cs" />
+    <EmbeddedResource Update="Resources.resx" Generator="ResXFileCodeGenerator" LastGenOutput="Resources.Designer.cs" />
   </ItemGroup>
+
   <PropertyGroup Condition="$(TargetFramework.StartsWith('xamarin.ios'))">
     <DefineConstants>$(DefineConstants);PLATFORM_IOS;XAMARIN</DefineConstants>
   </PropertyGroup>
@@ -58,6 +62,8 @@
     <Reference Include="System.Runtime.Serialization" />
     <Compile Include="Platforms\ios\**\*.cs" />
   </ItemGroup>
+
+  <!--
   <PropertyGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
     <DefineConstants>$(DefineConstants);WINDOWS_UWP;WINDOWS_UAP;XAMARIN</DefineConstants>
     <TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
@@ -66,16 +72,18 @@
   <ItemGroup Condition="$(TargetFramework.StartsWith('uap10.0'))">
     <PackageReference Include="Xamarin.Essentials" Version="1.5.3.2" />
     <Compile Include="Platforms\uwp\**\*.cs" />
+    <EmbeddedResource Include="Properties\*.rd.xml" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <Compile Include="Platforms\netstandard20\**\*.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Security" />
     <Compile Include="Platforms\net461\**\*.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+
+  -->
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <Compile Include="Platforms\netstandard20\**\*.cs" />
   </ItemGroup>
+
 </Project>
