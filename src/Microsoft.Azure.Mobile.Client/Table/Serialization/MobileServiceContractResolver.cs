@@ -11,6 +11,7 @@ using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Microsoft.WindowsAzure.MobileServices
 {
@@ -406,9 +407,24 @@ namespace Microsoft.WindowsAzure.MobileServices
                 var relevantProperties = FilterJsonPropertyCacheByType(typeInfo);
                 foreach (var property in properties)
                 {
-                    var memberInfo = relevantProperties.Single(x => x.Value == property).Key;
-                    SetMemberConverters(property);
-                    ApplySystemPropertyAttributes(property, memberInfo);
+                    try
+                    {
+                        var kvp = relevantProperties.SingleOrDefault(x => x.Value == property);
+                        var memberInfo = kvp.Key;
+                        if (memberInfo == default)
+                        {
+                            kvp = relevantProperties.SingleOrDefault(x => x.Value.PropertyName == property.PropertyName);
+                            memberInfo = kvp.Key;
+                        }
+                        if (memberInfo == default)
+                            System.Diagnostics.Debug.WriteLine("");
+                        SetMemberConverters(property);
+                        ApplySystemPropertyAttributes(property, memberInfo);
+                    }
+                    catch (Exception e)
+                    {
+                        System.Diagnostics.Debug.WriteLine("");
+                    }
                 }
 
                 // Determine the system properties from the property names
