@@ -253,6 +253,9 @@ namespace Microsoft.WindowsAzure.MobileServices
         {
         }
 
+        public void AddHeader(string key, string value)
+            => HttpClient.AddHeader(key, value);
+
         /// <summary>
         /// Returns a <see cref="IMobileServiceTable"/> instance, which provides
         /// untyped data operations for that table.

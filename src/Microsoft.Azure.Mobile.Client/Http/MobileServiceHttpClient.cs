@@ -139,6 +139,12 @@ namespace Microsoft.WindowsAzure.MobileServices
             this.httpClientSansHandlers.DefaultRequestHeaders.Add(ZumoVersionHeader, userAgentHeaderValue);
         }
 
+        public void AddHeader(string key, string value)
+        {
+            this.httpClient.DefaultRequestHeaders.Add(key, value);
+            this.httpClientSansHandlers.DefaultRequestHeaders.Add(key, value);
+        }
+
         /// <summary>
         /// Performs a web request and includes the standard Mobile Services
         /// headers. It will use an HttpClient without any http handlers.
