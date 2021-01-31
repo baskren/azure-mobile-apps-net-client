@@ -195,9 +195,11 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             var query = CreateQuery();
             if (queryPair?.Predicate != null)
                 query = query.Where(queryPair.Predicate);
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType().ToString() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "] QueryPair=[" + queryPair + "] query=[" + query + "]");
+            if (MobileServiceClient.Verbose)
+                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType().ToString() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "] QueryPair=[" + queryPair + "] query=[" + query + "]");
             var result = PullAsync(queryPair.Id, query, true, CancellationToken.None, null);
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "]");
+            if (MobileServiceClient.Verbose)
+                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "]");
 
             PendingQueries.Remove(queryPair);
             _pulling = false;
@@ -213,7 +215,8 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
         public override void ProcessJObjects(IEnumerable<JObject> serverJObjects)
         {
             //if (MobileServiceClient.Verbose)
-            System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + DebugExtensions.CallerString() + ": serverJObjects<" + typeof(T) + ">.Count[" + serverJObjects.Count() + "]");
+            if (MobileServiceClient.Verbose)
+                System.Diagnostics.Debug.WriteLine("[LiveCollectionTable." + DebugExtensions.CallerString() + ": serverJObjects<" + typeof(T) + ">.Count[" + serverJObjects.Count() + "]");
             var deleteItems = new List<T>();
             var insertItems = new List<T>();
             foreach (var jobject in serverJObjects)
@@ -237,11 +240,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
             MainThread.BeginInvokeOnMainThread(() =>
             {
 #endif
-                if (deleteItems.Any())
-                    OnCollectionChanged(Collection, Collection.RemoveRange(deleteItems));
-                if (insertItems.Any())
-                    OnCollectionChanged(Collection, Collection.AddRange(insertItems));
+            if (deleteItems.Any())
+                OnCollectionChanged(Collection, Collection.RemoveRange(deleteItems));
+            if (insertItems.Any())
+                OnCollectionChanged(Collection, Collection.AddRange(insertItems));
 
+            if (MobileServiceClient.Verbose)
                 System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Collection.Count[" + Collection.Count + "]");
 #if XAMARIN
             });
