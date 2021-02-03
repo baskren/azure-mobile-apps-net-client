@@ -46,6 +46,7 @@ namespace Microsoft.WindowsAzure.MobileServices
         private static readonly HttpMessageHandler[] EmptyHttpMessageHandlers = new HttpMessageHandler[0];
 
         public static bool Verbose { get; set; }
+        public static bool VerboseRequestResponse { get; set; }
 
         /// <summary>
         /// Absolute URI of the Microsoft Azure Mobile App.

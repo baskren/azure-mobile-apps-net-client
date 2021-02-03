@@ -574,11 +574,13 @@ namespace Microsoft.WindowsAzure.MobileServices
             }
 
             if (MobileServiceClient.Verbose)
+            {
                 foreach (var header in request.Headers)
                 {
                     if (header.Value is List<string> values)
                         System.Diagnostics.Debug.WriteLine("\t header[" + header.Key + "] = [" + String.Join(", ", values) + "]");
                 }
+            }
             return request;
         }
 
@@ -668,6 +670,15 @@ namespace Microsoft.WindowsAzure.MobileServices
                 }
             }
 
+            if (MobileServiceClient.VerboseRequestResponse)
+            {
+                System.Diagnostics.Debug.WriteLine("\n ========= BEGIN REQUEST =========");
+                System.Diagnostics.Debug.WriteLine("[MobileServiceHttpClient." + DebugExtensions.CallerString() + ": URL [" + request.RequestUri + "]");
+                System.Diagnostics.Debug.WriteLine(" ========= END REQUEST / BEGIN RESPONSE =========");
+                string responseContent = await GetResponseContent(response);
+                System.Diagnostics.Debug.WriteLine(responseContent);
+                System.Diagnostics.Debug.WriteLine(" ========= END RESPONSE ========= \n");
+            }
             return response;
         }
 
