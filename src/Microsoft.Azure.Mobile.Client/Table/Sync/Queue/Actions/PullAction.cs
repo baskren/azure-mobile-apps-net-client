@@ -113,6 +113,9 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 string id = this.Reader.GetId(item);
                 if (id == null)
                 {
+                    System.Diagnostics.Debug.WriteLine("WARNING: THE FOLLOWING ODATA ENTRY DOES NOT HAVE A VALID 'id' FIELD ========================");
+                    System.Diagnostics.Debug.WriteLine(item.ToString());
+                    System.Diagnostics.Debug.WriteLine("============================================================================================");
                     continue;
                 }
 

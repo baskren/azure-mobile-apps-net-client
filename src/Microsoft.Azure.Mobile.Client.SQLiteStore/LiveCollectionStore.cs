@@ -23,10 +23,19 @@ namespace Microsoft.WindowsAzure.MobileServices.SQLiteStore
 
         public override async Task UpsertAsync(string tableName, IEnumerable<JObject> items, bool ignoreMissingColumns)
         {
-            await base.UpsertAsync(tableName, items, ignoreMissingColumns);
-            ILiveCollectionTable table = null;
-            if (LiveCollectionTable.Tables?.TryGetValue(tableName, out table) ?? false)
-                table.ProcessJObjects(items);
+            try
+            {
+                await base.UpsertAsync(tableName, items, ignoreMissingColumns);
+                ILiveCollectionTable table = null;
+                if (LiveCollectionTable.Tables?.TryGetValue(tableName, out table) ?? false)
+                    table.ProcessJObjects(items);
+            }
+            catch (Exception e)
+            {
+                System.Diagnostics.Debug.WriteLine("\n===================================================================");
+                System.Diagnostics.Debug.WriteLine("UpsertAsync EXCEPTION: " + e.Message);
+                System.Diagnostics.Debug.WriteLine("===================================================================\n");
+            }
         }
 
         public override async Task DeleteAsync(string tableName, IEnumerable<string> ids)
