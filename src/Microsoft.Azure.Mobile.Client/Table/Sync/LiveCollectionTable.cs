@@ -56,6 +56,12 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                     ServerPullingChanged?.Invoke(this, IsServerPulling);
             }
         }
+
+        PullOptions _pullOptions = new PullOptions { MaxPageSize = 10000 };
+        public PullOptions PullOptions
+        {
+            get => _pullOptions;
+        }
         #endregion
 
 
@@ -197,7 +203,7 @@ namespace Microsoft.WindowsAzure.MobileServices.Sync
                 query = query.Where(queryPair.Predicate);
             if (MobileServiceClient.Verbose)
                 System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType().ToString() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "] QueryPair=[" + queryPair + "] query=[" + query + "]");
-            var result = PullAsync(queryPair.Id, query, true, CancellationToken.None, null);
+            var result = PullAsync(queryPair.Id, query, true, CancellationToken.None, PullOptions);
             if (MobileServiceClient.Verbose)
                 System.Diagnostics.Debug.WriteLine("[LiveCollectionTable]" + GetType() + "." + DebugExtensions.CallerString() + ": Colleciton.Count[" + Collection.Count() + "]");
 
